@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Analytics - Habit Tracker</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+
+<body class="bg-light">
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="display-6 text-primary">Analytics</h1>
+      <p class="text-muted">Track your progress and insights</p>
+    </div>
+    <div>
+      <a class="btn btn-outline-secondary" href="/">Back</a>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h6>Overall Completion</h6>
+        <div id="overallPercent" class="h2">0%</div>
+        <div class="progress">
+          <div id="overallBar" class="progress-bar" role="progressbar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h6>Best Streak (days)</h6>
+        <div id="longestStreak" class="h2">0</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h6>Total Completions</h6>
+        <div id="totalCompletions" class="h2">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Analytics Table -->
+  <div class="card p-3 mb-4">
+    <h5 class="mb-3">Weekly Habit Performance</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Habit</th>
+            <th class="text-center">Weekly Total</th>
+            <th class="text-center">Consistency</th>
+            <th class="text-center">Streak</th>
+          </tr>
+        </thead>
+        <tbody id="analyticsBody">
+          <!-- injected by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- High / Low Performance -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h5>High Performance Habits</h5>
+        <ul id="highList" class="list-group list-group-flush"></ul>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h5>Needs Attention</h5>
+        <ul id="lowList" class="list-group list-group-flush"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Analytics -->
+  <div class="card mt-4 p-3">
+    <h5>Monthly Analytics</h5>
+    <ul id="monthlyList" class="list-group list-group-flush"></ul>
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+function loadAnalytics() {
+  $.getJSON('/api/analytics').done(function(res) {
+    const high = res.high || [];
+    const low = res.low || [];
+    const all = high.concat(low);
+
+    // ---- Weekly Table ----
+    const body = $("#analyticsBody");
+    body.empty();
+
+    let totalCompletions = 0;
+    let bestStreak = 0;
+
+    all.forEach(h => {
+      totalCompletions += h.weekly_total;
+      bestStreak = Math.max(bestStreak, h.streak);
+
+      body.append(`
+        <tr>
+          <td>${h.name}</td>
+          <td class="text-center">${h.weekly_total}</td>
+          <td class="text-center">${Math.round(h.consistency * 100)}%</td>
+          <td class="text-center">${h.streak}</td>
+        </tr>
+      `);
+    });
+
+    // ---- Summary Cards ----
+    $("#totalCompletions").text(totalCompletions);
+    $("#longestStreak").text(bestStreak);
+
+    const percent = all.length
+      ? Math.round((totalCompletions / (all.length * 7)) * 100)
+      : 0;
+
+    $("#overallPercent").text(percent + "%");
+    $("#overallBar").css("width", percent + "%");
+
+    // ---- High / Low Lists ----
+    $("#highList").empty();
+    $("#lowList").empty();
+
+    high.forEach(h =>
+      $("#highList").append(
+        `<li class="list-group-item d-flex justify-content-between">
+          <span>${h.name}</span>
+          <span>${Math.round(h.rate * 100)}%</span>
+        </li>`
+      )
+    );
+
+    low.forEach(h =>
+      $("#lowList").append(
+        `<li class="list-group-item d-flex justify-content-between">
+          <span>${h.name}</span>
+          <span>${Math.round(h.rate * 100)}%</span>
+        </li>`
+      )
+    );
+  });
+}
+
+function loadMonthly() {
+  $.getJSON('/api/monthly').done(function(data) {
+    const list = $("#monthlyList");
+    list.empty();
+
+    data.forEach(h => {
+      list.append(
+        `<li class="list-group-item d-flex justify-content-between">
+          <span>${h.name}</span>
+          <span>${h.monthly_total}</span>
+        </li>`
+      );
+    });
+  });
+}
+
+$(function() {
+  loadAnalytics();
+  loadMonthly();
+});
+</script>
+
+</body>
+</html>

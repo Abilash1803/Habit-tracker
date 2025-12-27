@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Habit Tracker</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+
+<body class="bg-light">
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="display-6 text-primary">Habit Tracker</h1>
+      <p class="text-muted">Build consistency, one day at a time</p>
+    </div>
+    <div>
+      <a class="btn btn-outline-primary" href="/analytics">Analytics</a>
+    </div>
+  </div>
+
+  <!-- Add Habit -->
+  <div class="card p-3 mb-4">
+    <div class="d-flex gap-2">
+      <input id="newHabitInput" class="form-control" placeholder="Add a new habit..." />
+      <button id="addHabitBtn" class="btn btn-primary">+ Add Habit</button>
+    </div>
+  </div>
+
+  <!-- Search + Week Navigation -->
+  <div class="card p-3 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+
+      <!-- 🔍 Search Input (NEW) -->
+      <div class="input-group" style="max-width: 260px;">
+        <span class="input-group-text">🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          class="form-control"
+          placeholder="Search habit..."
+        />
+      </div>
+
+      <!-- Week Navigation -->
+      <div class="d-flex align-items-center gap-2">
+        <button id="prevWeek" class="btn btn-sm btn-light">&larr;</button>
+        <button id="nextWeek" class="btn btn-sm btn-light">&rarr;</button>
+        <h5 id="weekLabel" class="mb-0 ms-2"></h5>
+      </div>
+    </div>
+
+    <!-- Habit Table -->
+    <div class="table-responsive">
+      <table id="habitTable" class="table table-bordered align-middle">
+        <!-- header & body injected by JS -->
+      </table>
+    </div>
+  </div>
+
+  <!-- Daily Chart -->
+  <div class="card p-3">
+    <h5>Daily Completions</h5>
+    <canvas id="dailyChart" height="90"></canvas>
+  </div>
+
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Existing App Logic -->
+<script src="/static/app.js"></script>
+
+<!-- 🔗 Search → API Wiring (MINIMAL & SAFE) -->
+<script>
+  // Hook search input to existing loadWeek logic
+  document.getElementById("searchInput").addEventListener("input", () => {
+    if (typeof loadWeek === "function") {
+      loadWeek();   // existing function in app.js
+    }
+  });
+</script>
+
+</body>
+</html>

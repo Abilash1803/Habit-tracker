@@ -1,0 +1,5 @@
+body { background: #f2fbfc; }
+.table th, .table td { vertical-align: middle; }
+.toggleBtn { min-width: 32px; }
+.table-success { background: #e6f9f4 !important; }
+.card { border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.05); }
